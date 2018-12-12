@@ -53,7 +53,7 @@
         app:layout_constraintHorizontal_bias="0.266"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_PhoneNum"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.648" />
 
     <EditText
         android:id="@+id/et_Day"
@@ -71,7 +71,7 @@
         app:layout_constraintHorizontal_bias="0.392"
         app:layout_constraintStart_toEndOf="@+id/et_Month"
         app:layout_constraintTop_toBottomOf="@+id/et_PhoneNum"
-        app:layout_constraintVertical_bias="0.473" />
+        app:layout_constraintVertical_bias="0.622" />
 
     <Button
         android:id="@+id/b_Add"
