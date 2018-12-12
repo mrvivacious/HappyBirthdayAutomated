@@ -1,5 +1,7 @@
 package us.mrvivacio.happybirthday;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -50,13 +52,37 @@ public class MainActivity extends AppCompatActivity {
                 // We have valid input, so add this person to sharedPref
                 else {
 //                    myToast("Good work: " + name + " -- " + number);
-
+                    // TODO:: format month and day into a singular date
+                    save(name, number, month, day);
                 }
             }
         });
     }
 
+    // Function save
+    // Saves contact to shared preferences
+    private void save(String name, String number, String month, String day) {
+        // Thank you, https://developer.android.com/training/data-storage/shared-preferences#java
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        editor.putString("fuck you", name + "HELLOOOOOO");
+        editor.apply();
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        String saved = sharedPref.getString("fuck you", "rip doesn't exist");
+        myToast("True : Saved == " + name + " : " + saved);
+
+    }
+
+    // Function myToast
+    // Quicker and more readable way to make Toasts without all the code
     private void myToast(String msg) {
-        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
     }
 }
