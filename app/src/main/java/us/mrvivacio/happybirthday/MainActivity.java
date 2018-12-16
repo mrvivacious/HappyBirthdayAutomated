@@ -154,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
         int PERMISSION_REQUEST_CODE = 1;
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
 
@@ -178,30 +177,69 @@ public class MainActivity extends AppCompatActivity {
         // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
         // https://stackoverflow.com/questions/1239026/how-to-create-a-file-in-android
         try {
-            // get the path to storage
+            // √ save.click()...
+            // √ Send info to this method,
+            // Check if a file already exists for this date,
+            // Yes: open that file's contents, append this new recipient to the end, save the file
+            // No: Create a new file and save this recipient
+            // Close file
+
+
+            // Construct the filepath for the received month
+            // First, get the path to external storage...
             File path = Environment.getExternalStorageDirectory();
 
-             // to this path add a new directory path
-            File dir = new File(path.getAbsolutePath() + "/HappyBirthday/");
+             // ...and specify the HappyBirthday folder with the appropriate month
+            String month = date.substring(0, date.length() - 2);
+            String day = date.substring(3);
+            File dir = new File(path.getAbsolutePath() + "/HappyBirthday/" + month);
             Log.d("fuck u", "path = " + dir);
 
-            // create this directory if not already created
-            dir.mkdir();
+            // Check if the directory exists
+            if (!dir.isDirectory()) {
+                // This directory doesn't exist, so let's create it real quick
+                dir.mkdir();
+//                Log.d("fuck u", "saveToFile: created directory ~");
+            }
 
-            // create the file in which we will write the contents
-            File file = new File(dir, date + ".txt");
-            Log.d("fuck u", "two");
+            // Else, directory exists, so proceed
 
+            // Create the filepath of this date's recipient data
+            File file = new File(dir, day + ".txt");
 
-            FileOutputStream os = new FileOutputStream(file);
-            String data = name + "/" + number + "\n";
+            // Check if the file exists
+            if (!file.exists()) {
+                // File doesn't exist, so let's create a new file and save this recipient
+                FileOutputStream os = new FileOutputStream(file);
+                String data = name + "/" + number + "\n";
 
-            os.write(data.getBytes());
-            Log.d("fuck u", "three");
+                os.write(data.getBytes());
+                Log.d("fuck u", "CREATING NEW FILE");
 
-            os.close();
+                os.close();
 
-            myToast("Saved");
+                // Our job here is done
+                myToast("Saved: " + name);
+                return;
+            }
+
+            else {
+                myToast("hi lol");
+            }
+
+//            // Else, the file does exist, so let's open it to edit it
+//
+//            Log.d("fuck u", "two");
+//
+//            FileOutputStream os = new FileOutputStream(file);
+//            String data = name + "/" + number + "\n";
+//
+//            os.write(data.getBytes());
+//            Log.d("fuck u", "three");
+//
+//            os.close();
+//
+//            myToast("Saved");
 
         } catch (IOException ioe) {
             ioe.printStackTrace();
