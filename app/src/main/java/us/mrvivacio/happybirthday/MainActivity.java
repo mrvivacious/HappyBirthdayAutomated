@@ -1,12 +1,36 @@
+// HappyBirthday
+// MainActivity.java
+// This file handles the functionality of HappyBirthday and allows the user to save and view birthdays
+//
+// Noteworthy:
+// : SMS, READ/WRITE storage permissions
+// : File read/write operations
+//
+// @author Vivek Bhookya
+
+// Features:
+// o Properly format the name and number
+// o What do we do if there isn't any mobile service available?
+// o Set up the automated background service to check for birthdays every 24 hours
+//
+// ––– Finished ~ –––
+//
+// √ Add a recipient's name and number to some birthday
+// √ Properly format the date
+// √ Read and write the data to files on the device (this allows for easier editing with external
+//  applications)
+// √ Code support for sending SMS messages
+
+
 package us.mrvivacio.happybirthday;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -16,19 +40,13 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.regex.Pattern;
 
 import static us.mrvivacio.happybirthday.Utilities.reformat;
 
 public class MainActivity extends AppCompatActivity {
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,12 +80,18 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                // We have valid input, so add this person to sharedPref
+                // We have valid input, so save this person to our data
                 else {
                     // myToast("Good work: " + name + " -- " + number);
                     String date = reformat(month, day);
                     // save(name, number, date);
                     saveToFile(name, number, date);
+
+                    // Empty the input fields
+                    ((TextView) findViewById(R.id.et_Name)).setText("");
+                    ((TextView) findViewById(R.id.et_PhoneNum)).setText("");
+                    ((TextView) findViewById(R.id.et_Month)).setText("");
+                    ((TextView) findViewById(R.id.et_Day)).setText("");
                 }
             }
         });
@@ -78,6 +102,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String month = ((TextView) findViewById(R.id.et_Month)).getText().toString();
                 String day = ((TextView) findViewById(R.id.et_Day)).getText().toString();
+
+                // Input validation
+                if (month.length() < 1 || month.length() > 2) {
+                    myToast("Please add a valid month");
+                    return;
+                } else if (day.length() < 1 || day.length() > 2) {
+                    myToast("Please add a valid day");
+                    return;
+                }
+
                 String date = reformat(month, day);
 
                 show(date);
@@ -135,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Great, we have all the data! Let's take a look!
                 // Substring to remove the last comma lol
-                myToast(listofRecipients.substring(0, listofRecipients.length() - 1));
+                myToast(listofRecipients.substring(0, listofRecipients.length() - 2));
             }
 
         } catch (IOException ioe) {
@@ -169,10 +203,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, msg, null, null);
-            myToast("Message sent ~");
+            // myToast("Message sent ~");
 
         } catch (Exception ex) {
-            myToast(ex.getMessage());
+            myToast("Error with sendSMS: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -244,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Our job here is done
                 myToast("New date, saved: " + name);
-                sendSMS(number, "Thank you for letting me add u to my tiny Happy Birthday app xoxo");
+                sendSMS(number, "Automated: Thank you for letting me add u to my tiny HappyBirthday app xoxo 💛 Vivek");
             }
 
             // Else, file exists, so open it and append this new recipient (instead of overwriting it lmao)
@@ -278,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Our job here is done
                 myToast("Updated date, added: " + name);
-                sendSMS(number, "Thank you for letting me add u to my tiny Happy Birthday app xoxo");
+                sendSMS(number, "Automated: Thank you for letting me add u to my tiny HappyBirthday app xoxo 💛 Vivek");
             }
 
         } catch (IOException ioe) {
