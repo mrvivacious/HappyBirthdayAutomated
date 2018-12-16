@@ -243,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
         // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
         // https://stackoverflow.com/questions/1239026/how-to-create-a-file-in-android
         try {
+            String msgToSend = "Automated: Thank you for letting me add u to my tiny HappyBirthday app, xoxo Vivek";
             // Construct the filepath for the received month
             // First, get the path to external storage...
             File path = Environment.getExternalStorageDirectory();
@@ -278,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Our job here is done
                 myToast("New date, saved: " + name);
-                sendSMS(number, "Automated: Thank you for letting me add u to my tiny HappyBirthday app xoxo 💛 Vivek");
+                sendSMS(number, msgToSend);
             }
 
             // Else, file exists, so open it and append this new recipient (instead of overwriting it lmao)
@@ -312,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Our job here is done
                 myToast("Updated date, added: " + name);
-                sendSMS(number, "Automated: Thank you for letting me add u to my tiny HappyBirthday app xoxo 💛 Vivek");
+                sendSMS(number, msgToSend);
             }
 
         } catch (IOException ioe) {
