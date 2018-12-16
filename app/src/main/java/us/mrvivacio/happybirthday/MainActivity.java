@@ -14,10 +14,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -148,6 +150,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Function saveToFile
+    // Saves the recipient data to files in the phone's storage to enable easier "on the fly" editing
+    // No more endless sharedPreferences .remove .set .apply
     private void saveToFile(String name, String number, String date) {
         // Request storage permissions if not yet authorized
         // Thank you, https://stackoverflow.com/questions/32635704/android-permission-doesnt-work-even-if-i-have-declared-it
@@ -177,14 +182,6 @@ public class MainActivity extends AppCompatActivity {
         // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
         // https://stackoverflow.com/questions/1239026/how-to-create-a-file-in-android
         try {
-            // √ save.click()...
-            // √ Send info to this method,
-            // Check if a file already exists for this date,
-            // Yes: open that file's contents, append this new recipient to the end, save the file
-            // No: Create a new file and save this recipient
-            // Close file
-
-
             // Construct the filepath for the received month
             // First, get the path to external storage...
             File path = Environment.getExternalStorageDirectory();
@@ -193,53 +190,68 @@ public class MainActivity extends AppCompatActivity {
             String month = date.substring(0, date.length() - 2);
             String day = date.substring(3);
             File dir = new File(path.getAbsolutePath() + "/HappyBirthday/" + month);
-            Log.d("fuck u", "path = " + dir);
+            // Log.d("fuck u", "path = " + dir);
 
             // Check if the directory exists
             if (!dir.isDirectory()) {
                 // This directory doesn't exist, so let's create it real quick
                 dir.mkdir();
-//                Log.d("fuck u", "saveToFile: created directory ~");
+                // Log.d("fuck u", "saveToFile: created directory ~");
             }
 
-            // Else, directory exists, so proceed
-
+            // Now, we definitely know that the directory exists, so let's keep going
             // Create the filepath of this date's recipient data
             File file = new File(dir, day + ".txt");
 
             // Check if the file exists
+            // Thank you, https://stackoverflow.com/questions/15571496/how-to-check-if-a-folder-exists
             if (!file.exists()) {
                 // File doesn't exist, so let's create a new file and save this recipient
                 FileOutputStream os = new FileOutputStream(file);
                 String data = name + "/" + number + "\n";
 
                 os.write(data.getBytes());
-                Log.d("fuck u", "CREATING NEW FILE");
+                // Log.d("fuck u", "CREATING NEW FILE");
 
                 os.close();
 
                 // Our job here is done
-                myToast("Saved: " + name);
-                return;
+                myToast("New date, saved: " + name);
+                sendSMS(number, "Thank you for letting me add u to my tiny Happy Birthday app xoxo");
             }
 
+            // Else, file exists, so open it and append this new recipient (instead of overwriting it lmao)
             else {
-                myToast("hi lol");
-            }
+                // Log.d("fuck u", "MODIFYING OLD FILE");
 
-//            // Else, the file does exist, so let's open it to edit it
-//
-//            Log.d("fuck u", "two");
-//
-//            FileOutputStream os = new FileOutputStream(file);
-//            String data = name + "/" + number + "\n";
-//
-//            os.write(data.getBytes());
-//            Log.d("fuck u", "three");
-//
-//            os.close();
-//
-//            myToast("Saved");
+                // Create a reader to parse the file
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String currLine = reader.readLine();
+                String updatedText = "";
+
+                // While we still have text to read, save each line to updatedText and keep reading
+                while (currLine != null) {
+                    Log.d("fuck u", "output: " + currLine);
+                    updatedText += currLine + "\n";
+                    currLine = reader.readLine();
+                }
+
+                // Great, we have all the original data, so let's append the new recipient
+                String data = name + "/" + number + "\n";
+                updatedText += data;
+                // Log.d("fuck u", "finally: " + updatedText);
+
+                // Overwrite the file with our new recipient
+                // (this process might be real shitty for if we have > 1000 people in a file...I guess this doesn't scale lol whatever)
+                FileOutputStream os = new FileOutputStream(file);
+                os.write(updatedText.getBytes());
+
+                os.close();
+
+                // Our job here is done
+                myToast("Updated date, added: " + name);
+                sendSMS(number, "Thank you for letting me add u to my tiny Happy Birthday app xoxo");
+            }
 
         } catch (IOException ioe) {
             ioe.printStackTrace();
