@@ -64,9 +64,9 @@ public class MainActivity extends AppCompatActivity {
 
                 // We have valid input, so add this person to sharedPref
                 else {
-//                    myToast("Good work: " + name + " -- " + number);
+                    // myToast("Good work: " + name + " -- " + number);
                     String date = reformat(month, day);
-//                    save(name, number, date);
+                    // save(name, number, date);
                     saveToFile(name, number, date);
                 }
             }
@@ -85,36 +85,63 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Function show
+    // View the recipient's saved for this date
     private void show(String date) {
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
+        // https://stackoverflow.com/questions/1239026/how-to-create-a-file-in-android
+        try {
+            // Construct the filepath for the received month
+            // First, get the path to external storage...
+            File path = Environment.getExternalStorageDirectory();
 
-        String bdays = sharedPref.getString(date, "rip");
+            // ...and specify the HappyBirthday folder with the appropriate month
+            String month = date.substring(0, date.length() - 2);
+            String day = date.substring(3);
+            File dir = new File(path.getAbsolutePath() + "/HappyBirthday/" + month);
+            // Log.d("fuck u", "path = " + dir);
 
-        if (bdays == "rip") {
-            myToast(bdays);
+            // Check if the directory exists
+            if (!dir.isDirectory()) {
+                // This directory doesn't exist, so nobody is saved!
+                myToast("No birthdays for this date were saved");
+            }
+
+            // Now, we definitely know that the directory exists, so let's keep going
+            // Create the filepath of this date's recipient data
+            File file = new File(dir, day + ".txt");
+
+            // Check if the file exists
+            // Thank you, https://stackoverflow.com/questions/15571496/how-to-check-if-a-folder-exists
+            if (!file.exists()) {
+                // This file doesn't exist, so nobody is saved!
+                myToast("No birthdays for this date were saved");
+            }
+
+            // Else, file exists, so open it and read the recipient data
+            else {
+                // Thank you, https://stackoverflow.com/questions/3806062/how-to-open-a-txt-file-and-read-numbers-in-java
+                // Create a reader to parse the file
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String currLine = reader.readLine();
+                String listofRecipients = date + "'s birthdays: ";
+
+                // While we still have text to read, save each line to updatedText and keep reading
+                while (currLine != null) {
+                    Log.d("fuck u", "output: " + currLine);
+                    listofRecipients += currLine + ", ";
+                    currLine = reader.readLine();
+                }
+
+                // Great, we have all the data! Let's take a look!
+                // Substring to remove the last comma lol
+                myToast(listofRecipients.substring(0, listofRecipients.length() - 1));
+            }
+
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            myToast("Uh oh error: " + ioe);
         }
-
-        // Else we got sumtin
-        String toShow = "";
-        // Thank you, https://stackoverflow.com/questions/14134558/list-of-all-special-characters-that-need-to-be-escaped-in-a-regex
-        String delimit = Pattern.quote("$$");
-
-        String[] newBdays = bdays.split(delimit);
-        Log.d("fuck u", newBdays[0]);
-
-        for (int i = 0; i < newBdays.length; i++) {
-            String[] parameters = newBdays[i].split("/");
-            String name = parameters[0];
-            String number = parameters[1];
-
-//            sendSMS(number, "Did u get this text if you did the android code works lmao");
-            Log.d("fuck u", "Sending to " + number);
-
-            toShow += name + ": " + number + ", ";
-        }
-
-        toShow = toShow.substring(0,toShow.length() - 2);
-        myToast(toShow);
 
     }
 
@@ -152,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Function saveToFile
     // Saves the recipient data to files in the phone's storage to enable easier "on the fly" editing
-    // No more endless sharedPreferences .remove .set .apply
+    // No more endless sharedPreferences .remove .put .apply
     private void saveToFile(String name, String number, String date) {
         // Request storage permissions if not yet authorized
         // Thank you, https://stackoverflow.com/questions/32635704/android-permission-doesnt-work-even-if-i-have-declared-it
@@ -224,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
             else {
                 // Log.d("fuck u", "MODIFYING OLD FILE");
 
+                // Thank you, https://stackoverflow.com/questions/3806062/how-to-open-a-txt-file-and-read-numbers-in-java
                 // Create a reader to parse the file
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 String currLine = reader.readLine();
