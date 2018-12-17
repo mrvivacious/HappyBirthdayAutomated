@@ -64,13 +64,15 @@ public class MyAlarmService extends Service {
         Intent myIntent = new Intent(this, MyAlarmService.class);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, myIntent, 0);
 
+        Log.d("fuck u", "startService: attempting to set this alarm lmao");
+
         // Create an alarmManager and a calendar instances
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
 
         // Set the alarm for 6 seconds plus the current time in the future
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.add(Calendar.SECOND, 120);
+        calendar.add(Calendar.SECOND, 6);
 
         // Setting alarm
          alarmManager.set(AlarmManager.ELAPSED_REALTIME, calendar.getTimeInMillis(), pendingIntent);

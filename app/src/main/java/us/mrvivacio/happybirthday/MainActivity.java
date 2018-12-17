@@ -24,12 +24,18 @@
 package us.mrvivacio.happybirthday;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -43,7 +49,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Calendar;
 
+import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
+import static android.support.v4.app.NotificationCompat.VISIBILITY_PUBLIC;
 import static us.mrvivacio.happybirthday.Utilities.reformat;
 
 public class MainActivity extends AppCompatActivity {
@@ -53,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d("fuck u", "MAIN ACTVITY: right before we callin this shitttt");
         startService(new Intent(this, MyAlarmService.class));
 
         Button add = findViewById(R.id.b_Add);
