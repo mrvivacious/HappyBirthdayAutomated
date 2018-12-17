@@ -64,8 +64,6 @@ public class MyAlarmService extends Service {
         Intent myIntent = new Intent(this, MyAlarmService.class);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, myIntent, 0);
 
-        Log.d("fuck u", "startService: attempting to set this alarm lmao");
-
         // Create an alarmManager and a calendar instances
         AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
@@ -75,7 +73,8 @@ public class MyAlarmService extends Service {
         calendar.add(Calendar.SECOND, 6);
 
         // Setting alarm
-         alarmManager.set(AlarmManager.ELAPSED_REALTIME, calendar.getTimeInMillis(), pendingIntent);
+        // GOTTA USE RTC/_WAKEUP with the current implementation
+         alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
 //        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 6*1000, pendingIntent);
 //        Log.d("fuck u", "startService: ALARM SETTTTT");
 
@@ -84,7 +83,7 @@ public class MyAlarmService extends Service {
         Date date;
         String msg;
 
-        Log.d("fuck u", "onStart: We tryna send this text dawg");
+//        Log.d("fuck u", "onStart: We tryna send this text dawg");
 
         msg = "nyeh\n";
 
