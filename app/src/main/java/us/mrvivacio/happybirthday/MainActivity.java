@@ -333,28 +333,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    private void startService() {
-//        Log.d("fuck u", "startService: We have entered our alarm service method");
-//        // Create the intent connecting this class with the alarm service class
-//        Intent myIntent = new Intent(MainActivity.this, MyAlarmService.class);
-//        PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 0, myIntent, 0);
-//
-//        // Create an alarmManager and a calendar instances
-//        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-//        Calendar calendar = Calendar.getInstance();
-//
-//        // Set the alarm for 10 seconds plus the current time in the future
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        calendar.add(Calendar.SECOND, 4);
-//
-//
-//        // Setting alarm
-//        // alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-//        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 6*1000, pendingIntent);
-//        Log.d("fuck u", "startService: ALARM SETTTTT");
-//
-//        Toast.makeText(MainActivity.this, "Start Alarm", Toast.LENGTH_LONG).show();
-//    }
 
     // Function save
     // Saves contact to shared preferences

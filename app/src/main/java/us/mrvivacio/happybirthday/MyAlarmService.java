@@ -15,7 +15,9 @@ import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -60,6 +62,7 @@ public class MyAlarmService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("fuck u", "startService: We have entered our alarm service method");
 
+        // WHEN TO RUN OUR ALARM SET UP
         // Create the intent connecting this class with the alarm service class
         Intent myIntent = new Intent(this, MyAlarmService.class);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, myIntent, 0);
@@ -78,20 +81,23 @@ public class MyAlarmService extends Service {
 //        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 6*1000, pendingIntent);
 //        Log.d("fuck u", "startService: ALARM SETTTTT");
 
+        // WHAT TO DO WHEN OUR ALARM RUNS SET UP
+        // EVERYTHING BELOW HANDLES THE CHECKING OF DATE AND RECIPIENT LIST COLLECTION
+        Utilities.checkDate();
+
         // Thank you, https://www.mkyong.com/java/java-how-to-get-current-date-time-date-and-calender/
-        DateFormat dateFormat;
-        Date date;
-        String msg;
-
-//        Log.d("fuck u", "onStart: We tryna send this text dawg");
-
-        msg = "nyeh\n";
-
-        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        date = new Date();
-        msg += dateFormat.format(date);
-
-        sendSMS("3096602340", msg);
+//        DateFormat dateFormat;
+//        Date date;
+//        String msg;
+//
+//
+//        msg = "nyeh\n";
+//
+//        dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+//        date = new Date();
+//        msg += dateFormat.format(date);
+//
+//        sendSMS("3096602340", msg);
         return START_STICKY;
     }
 
