@@ -17,6 +17,10 @@
 
             </intent-filter>
         </activity>
+
+        <service android:name=".MyAlarmService"
+            android:stopWithTask="false"/>
+
     </application>
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

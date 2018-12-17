@@ -21,11 +21,11 @@
 //  applications)
 // √ Code support for sending SMS messages
 
-
 package us.mrvivacio.happybirthday;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -53,9 +53,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("fuck u", "MAIN ACTVITY: right before we callin this shitttt");
+        startService(new Intent(this, MyAlarmService.class));
+
         Button add = findViewById(R.id.b_Add);
         Button view = findViewById(R.id.b_View);
 
+        // Add a recipient
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -227,7 +231,6 @@ public class MainActivity extends AppCompatActivity {
                 String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
-
             }
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
@@ -236,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
                 String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
 
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
-
             }
         }
 
@@ -322,6 +324,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+//    private void startService() {
+//        Log.d("fuck u", "startService: We have entered our alarm service method");
+//        // Create the intent connecting this class with the alarm service class
+//        Intent myIntent = new Intent(MainActivity.this, MyAlarmService.class);
+//        PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 0, myIntent, 0);
+//
+//        // Create an alarmManager and a calendar instances
+//        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+//        Calendar calendar = Calendar.getInstance();
+//
+//        // Set the alarm for 10 seconds plus the current time in the future
+//        calendar.setTimeInMillis(System.currentTimeMillis());
+//        calendar.add(Calendar.SECOND, 4);
+//
+//
+//        // Setting alarm
+//        // alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+//        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 6*1000, pendingIntent);
+//        Log.d("fuck u", "startService: ALARM SETTTTT");
+//
+//        Toast.makeText(MainActivity.this, "Start Alarm", Toast.LENGTH_LONG).show();
+//    }
 
     // Function save
     // Saves contact to shared preferences
