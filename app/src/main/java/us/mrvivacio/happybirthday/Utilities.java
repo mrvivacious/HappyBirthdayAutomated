@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -85,6 +86,8 @@ public class Utilities {
                 // If prevDate is the same as todayDate, do nothing
                 if (prevDate.contains(todayDate)) {
                     // Nothing needs to be done
+                    Log.d("datez", "DO NOTHING");
+
                     return;
                 }
 
@@ -97,7 +100,9 @@ public class Utilities {
                 os.close();
 
                 // Send the texts
-                sendSMS();
+                file = new File(dir, todayDate + ".txt");
+                Log.d("hb msg", "checkDate: calling happybirthday");
+                happyBirthday(file, todayDate);
 
 
                 // Our job here is done
@@ -135,10 +140,70 @@ public class Utilities {
         return retDate;
     }
 
+    private static void happyBirthday(File file, String today) {
+        Log.d("datez", "happyBirthday: file = " + file);
+        // Open the file and iterate through each line
+        // SendSMS with that person's number and concatenate the name to another string
+        // Finally, sendSMS to myself with that day's recipients to notify me of that day's birthdays
+
+        // Thank you, https://stackoverflow.com/questions/3806062/how-to-open-a-txt-file-and-read-numbers-in-java
+        // Create a reader to parse the file
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            // No birthdays saved for today ~
+            e.printStackTrace();
+        }
+
+        try {
+            String currLine = reader.readLine();
+            String listOfRecipients = today + "'s birthdays: ";
+
+            // While we still have text to read, SMS this line's person and save the name
+            while (currLine != null) {
+//                Log.d("fuck u", "output: " + currLine);
+                int idxOfSlash = currLine.indexOf("/");
+
+                String name = currLine.substring(0, idxOfSlash);
+                String number = currLine.substring(idxOfSlash + 1, currLine.length());
+                String msg = generateHBMsg(name);
+
+                // That's the show
+                sendSMS(number, msg);
+                Log.d("datez", "happyBirthday: name = " + name + " -- number = " + number);
+
+                listOfRecipients += name + ", ";
+                currLine = reader.readLine();
+            }
+
+            // Great, we have all the data! Let's take a look!
+            // Substring to remove the last ", " lol
+            listOfRecipients = listOfRecipients.substring(0, listOfRecipients.length() - 2);
+            sendSMS(EnvironmentVars.myNumber, listOfRecipients);
+
+        } catch (IOException ioe) {
+            sendSMS(EnvironmentVars.myNumber, "Utilities/happyBirthday: ioe error\n" + ioe);
+        }
+
+    }
+
+    private static String generateHBMsg(String name) {
+        String msg = "Automated: ";
+        String [] msgs = {"Happy birthday ", "Have a nice birthday ", "Happy birthday dear "};
+
+        int randomIdx = (int) Math.floor(Math.random() * 3);
+        String randomMsg = msgs[randomIdx];
+
+        msg += randomMsg + name + " ~";
+
+        return msg;
+    }
+
     // Function sendSMS
     // Sends the msg to the phoneNo
     // Thank you, https://stackoverflow.com/questions/26311243/sending-sms-programmatically-without-opening-message-app
-    private void sendSMS(String phoneNo, String msg) {
+    private static void sendSMS(String phoneNo, String msg) {
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, msg, null, null);
