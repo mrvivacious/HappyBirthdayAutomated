@@ -108,8 +108,8 @@ public class Utilities {
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
+            return;
         }
-
     }
 
     // Function reformat
@@ -156,6 +156,7 @@ public class Utilities {
         } catch (FileNotFoundException e) {
             // No birthdays saved for today ~
             e.printStackTrace();
+            return;
         }
 
         try {
@@ -185,8 +186,8 @@ public class Utilities {
             sendSMS(EnvironmentVars.myNumber, listOfRecipients);
         } catch (IOException ioe) {
             sendSMS(EnvironmentVars.myNumber, "Utilities/happyBirthday: ioe error\n" + ioe);
+            return;
         }
-
     }
 
     // Function generateHBMsg
@@ -219,6 +220,7 @@ public class Utilities {
             // Bump myself
             sendSMS(EnvironmentVars.myNumber, "Error from Utilities.sendSMS");
             ex.printStackTrace();
+            return;
         }
     }
 }
