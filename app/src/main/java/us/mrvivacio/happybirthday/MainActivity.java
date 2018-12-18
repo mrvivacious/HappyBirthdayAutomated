@@ -7,11 +7,10 @@
 // : File read/write operations
 //
 // @author Vivek Bhookya
-
+//
 // Features:
-// o Properly format the name and number
-// o What do we do if there isn't any mobile service available?
-// o Set up the automated background service to check for birthdays every 24 hours
+// No mobile service available, msg sits in our phone until service is found, ez
+// X Set up the automated background service to check for birthdays every 24 hours (we tried)
 //
 // ––– Finished ~ –––
 //
@@ -24,18 +23,12 @@
 package us.mrvivacio.happybirthday;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -49,10 +42,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Calendar;
 
-import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
-import static android.support.v4.app.NotificationCompat.VISIBILITY_PUBLIC;
 import static us.mrvivacio.happybirthday.Utilities.reformat;
 
 public class MainActivity extends AppCompatActivity {
@@ -62,8 +52,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Check if we have all of our permissions in place
         initPermissions();
 
+        // Initiate a service for bday checking
         startService(new Intent(this, MyAlarmService.class));
 
         Button add = findViewById(R.id.b_Add);
@@ -135,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Function show
     // View the recipient's saved for this date
+    // @param date The date to check
     private void show(String date) {
         // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
         // https://stackoverflow.com/questions/1239026/how-to-create-a-file-in-android
@@ -147,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             String month = date.substring(0, date.length() - 2);
             String day = date.substring(3);
             File dir = new File(path.getAbsolutePath() + "/HappyBirthday/" + month);
-            // Log.d("fuck u", "path = " + dir);
+            // Log.d("MainActivity", "path = " + dir);
 
             // Check if the directory exists
             if (!dir.isDirectory()) {
@@ -172,20 +165,19 @@ public class MainActivity extends AppCompatActivity {
                 // Create a reader to parse the file
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 String currLine = reader.readLine();
-                String listofRecipients = date + "'s birthdays: ";
+                String listOfRecipients = date + "'s birthdays: ";
 
                 // While we still have text to read, save each line to updatedText and keep reading
                 while (currLine != null) {
-                    Log.d("fuck u", "output: " + currLine);
-                    listofRecipients += currLine + ", ";
+                    Log.d("MainActivity", "output: " + currLine);
+                    listOfRecipients += currLine + ", ";
                     currLine = reader.readLine();
                 }
 
                 // Great, we have all the data! Let's take a look!
                 // Substring to remove the last comma lol
-                myToast(listofRecipients.substring(0, listofRecipients.length() - 2));
+                myToast(listOfRecipients.substring(0, listOfRecipients.length() - 2));
             }
-
         } catch (IOException ioe) {
             ioe.printStackTrace();
             myToast("Uh oh error: " + ioe);
@@ -193,21 +185,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // Function sendSMS
-    // Sends the msg to the phoneNo
-    // Thank you, https://stackoverflow.com/questions/26311243/sending-sms-programmatically-without-opening-message-app
-    private void sendSMS(String phoneNo, String msg) {
-        try {
-            SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(phoneNo, null, msg, null, null);
-            // myToast("Message sent ~");
-
-        } catch (Exception ex) {
-            myToast("Error with sendSMS: " + ex.getMessage());
-            ex.printStackTrace();
-        }
-    }
-
+    // Function initPermissions
+    // Check for and request the permissions needed for this app to work
     private void initPermissions() {
         // Request storage permissions if not yet authorized
         // Thank you, https://stackoverflow.com/questions/32635704/android-permission-doesnt-work-even-if-i-have-declared-it
@@ -218,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
 
-                Log.d("fuck u", "permission denied to WRTIE EXTERNAL STORAGE - requesting it");
+                Log.d("MainActivity", "permission denied to WRTIE EXTERNAL STORAGE - requesting it");
                 String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
@@ -226,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
 
-                Log.d("fuck u", "permission denied to READ EXTERNAL STORAGE - requesting it");
+                Log.d("MainActivity", "permission denied to READ EXTERNAL STORAGE - requesting it");
                 String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
 
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
@@ -236,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
             if (checkSelfPermission(Manifest.permission.SEND_SMS)
                     == PackageManager.PERMISSION_DENIED) {
 
-                Log.d("fuck u", "permission denied to SEND_SMS - requesting it");
+                Log.d("MainActivity", "permission denied to SEND_SMS - requesting it");
                 String[] permissions = {Manifest.permission.SEND_SMS};
 
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
@@ -247,6 +226,9 @@ public class MainActivity extends AppCompatActivity {
     // Function saveToFile
     // Saves the recipient data to files in the phone's storage to enable easier "on the fly" editing
     // No more endless sharedPreferences .remove .put .apply
+    // @param name The name of the recipient
+    // @param number The phone number of this recipient
+    // @param date The birth date of this recipient
     private void saveToFile(String name, String number, String date) {
         // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
         // https://stackoverflow.com/questions/1239026/how-to-create-a-file-in-android
@@ -260,13 +242,13 @@ public class MainActivity extends AppCompatActivity {
             String month = date.substring(0, date.length() - 2);
             String day = date.substring(3);
             File dir = new File(path.getAbsolutePath() + "/HappyBirthday/" + month);
-            // Log.d("fuck u", "path = " + dir);
+            // Log.d("MainActivity", "path = " + dir);
 
             // Check if the directory exists
             if (!dir.isDirectory()) {
                 // This directory doesn't exist, so let's create it real quick
                 dir.mkdir();
-                // Log.d("fuck u", "saveToFile: created directory ~");
+                // Log.d("MainActivity", "saveToFile: created directory ~");
             }
 
             // Now, we definitely know that the directory exists, so let's keep going
@@ -281,18 +263,17 @@ public class MainActivity extends AppCompatActivity {
                 String data = name + "/" + number + "\n";
 
                 os.write(data.getBytes());
-                // Log.d("fuck u", "CREATING NEW FILE");
+                // Log.d("MainActivity", "CREATING NEW FILE");
 
                 os.close();
 
                 // Our job here is done
                 myToast("New date, saved: " + name);
-                sendSMS(number, msgToSend);
+                Utilities.sendSMS(number, msgToSend);
             }
-
             // Else, file exists, so open it and append this new recipient (instead of overwriting it lmao)
             else {
-                // Log.d("fuck u", "MODIFYING OLD FILE");
+                // Log.d("MainActivity", "MODIFYING OLD FILE");
 
                 // Thank you, https://stackoverflow.com/questions/3806062/how-to-open-a-txt-file-and-read-numbers-in-java
                 // Create a reader to parse the file
@@ -302,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // While we still have text to read, save each line to updatedText and keep reading
                 while (currLine != null) {
-                    Log.d("fuck u", "output: " + currLine);
+//                    Log.d("MainActivity", "output: " + currLine);
                     updatedText += currLine + "\n";
                     currLine = reader.readLine();
                 }
@@ -310,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
                 // Great, we have all the original data, so let's append the new recipient
                 String data = name + "/" + number + "\n";
                 updatedText += data;
-                // Log.d("fuck u", "finally: " + updatedText);
+                // Log.d("MainActivity", "finally: " + updatedText);
 
                 // Overwrite the file with our new recipient
                 // (this process might be real shitty for if we have > 1000 people in a file...I guess this doesn't scale lol whatever)
@@ -321,19 +302,20 @@ public class MainActivity extends AppCompatActivity {
 
                 // Our job here is done
                 myToast("Updated date, added: " + name);
-                sendSMS(number, msgToSend);
+                Utilities.sendSMS(number, msgToSend);
             }
-
         } catch (IOException ioe) {
             ioe.printStackTrace();
             myToast("Uh oh error: " + ioe);
         }
-
     }
 
 
-    // Function save
+    // Function save (unused, I prefer saveToFile to enable third-party app editing for the files)
     // Saves contact to shared preferences
+    // @param name The name of the recipient
+    // @param number The phone number of this recipient
+    // @param date The birth date of this recipient
     private void save(String name, String number, String date) {
         // Thank you, https://developer.android.com/training/data-storage/shared-preferences#java
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -369,6 +351,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Function myToast
     // Quicker and more readable way to make Toasts without all the code
+    // If you didn't have breakfast today don't worry I'm bringing some toastttttt
+    // @param msg The msg to display
     private void myToast(String msg) {
         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
     }

@@ -142,7 +142,7 @@ public class Utilities {
     // Gets today's recipients and SMS them
     // @param file The filepath to pull today's date.txt out of
     // @param today The .txt file we want to inspect for today's birthdays
-    private static void happyBirthday(File file, String today) {
+    public static void happyBirthday(File file, String today) {
         Log.d("datez", "happyBirthday: file = " + file);
         // Open the file and iterate through each line
         // SendSMS with that person's number and concatenate the name to another string
@@ -192,7 +192,7 @@ public class Utilities {
     // Function generateHBMsg
     // Generates a random Happy birthday message to deliver
     // @param name The name of the recipient
-    private static String generateHBMsg(String name) {
+    public static String generateHBMsg(String name) {
         String msg = "Automated: ";
         String [] msgs = {"Happy birthday ", "Have a nice birthday ", "Happy birthday dear "};
 
@@ -210,7 +210,7 @@ public class Utilities {
     // @param phoneNo The phone number to SMS
     // @param msg The message to send in the text
     // Thank you, https://stackoverflow.com/questions/26311243/sending-sms-programmatically-without-opening-message-app
-    private static void sendSMS(String phoneNo, String msg) {
+    public static void sendSMS(String phoneNo, String msg) {
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, msg, null, null);
