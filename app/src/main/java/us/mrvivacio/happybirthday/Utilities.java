@@ -1,9 +1,15 @@
+// HappyBirthday
+// Utilities.java
+//
+// This file holds utility methods to make the entire app more readable
+//
+// @author Vivek Bhookya
+
 package us.mrvivacio.happybirthday;
 
 import android.os.Environment;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,7 +42,7 @@ public class Utilities {
             if (!dir.isDirectory()) {
                 // This directory doesn't exist, so let's create it real quick
                 dir.mkdir();
-                // Log.d("fuck u", "saveToFile: created directory ~");
+                // Log.d("Utilities", "saveToFile: created directory ~");
             }
 
             // Now, we definitely know that the directory exists, so let's keep going
@@ -56,13 +62,11 @@ public class Utilities {
                 todayDate = dateFormat.format(date);
 
                 os.write(todayDate.getBytes());
-                // Log.d("fuck u", "CREATING NEW FILE");
-
-                os.close();
+                // Log.d("Utilities", "CREATING NEW FILE");
 
                 // Our job here is done
+                os.close();
             }
-
             // Else, file exists, so open it and check the date
             else {
                 // Thank you, https://stackoverflow.com/questions/3806062/how-to-open-a-txt-file-and-read-numbers-in-java
@@ -71,8 +75,7 @@ public class Utilities {
                 // The first (and only) line of the file should be the date
                 String prevDate = reader.readLine();
 
-
-                // Great, we have our prevDate , so let's investigate it
+                // Great, we have our prevDate, so let's investigate it
                 // Get today's date to compare against
                 String todayDate;
                 DateFormat dateFormat = new SimpleDateFormat("MM/dd");
@@ -81,13 +84,12 @@ public class Utilities {
                 todayDate = dateFormat.format(date);
 
                 // When using the same dates (ie. 12/17 and 12/17), using == operator returned false for whatever reason whereas .contains() returns true
-                // Log.d("datezzz", "checkDate: " + prevDate + " ==? " + todayDate + ": " + (prevDate.contains(todayDate)));
+                // Log.d("Utilities", "checkDate: " + prevDate + " ==? " + todayDate + ": " + (prevDate.contains(todayDate)));
 
                 // If prevDate is the same as todayDate, do nothing
                 if (prevDate.contains(todayDate)) {
                     // Nothing needs to be done
-                    Log.d("datez", "DO NOTHING");
-
+                    Log.d("Utilities", "DO NOTHING");
                     return;
                 }
 
@@ -103,21 +105,17 @@ public class Utilities {
                 file = new File(dir, todayDate + ".txt");
                 Log.d("hb msg", "checkDate: calling happybirthday");
                 happyBirthday(file, todayDate);
-
-
-                // Our job here is done
-//                myToast("Updated date, added: " + name);
-//                sendSMS(number, msgToSend);
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
-//            myToast("Uh oh error: " + ioe);
         }
 
     }
 
     // Function reformat
     // Reformats the date parameters into an easier-to-work-with format
+    // @param month The string representing the month
+    // @param day The string representing the day number
     public static String reformat(String month, String day) {
         String retDate = "";
 
@@ -140,6 +138,10 @@ public class Utilities {
         return retDate;
     }
 
+    // Function happyBirthday
+    // Gets today's recipients and SMS them
+    // @param file The filepath to pull today's date.txt out of
+    // @param today The .txt file we want to inspect for today's birthdays
     private static void happyBirthday(File file, String today) {
         Log.d("datez", "happyBirthday: file = " + file);
         // Open the file and iterate through each line
@@ -162,7 +164,7 @@ public class Utilities {
 
             // While we still have text to read, SMS this line's person and save the name
             while (currLine != null) {
-//                Log.d("fuck u", "output: " + currLine);
+//                Log.d("Utilities", "output: " + currLine);
                 int idxOfSlash = currLine.indexOf("/");
 
                 String name = currLine.substring(0, idxOfSlash);
@@ -171,27 +173,30 @@ public class Utilities {
 
                 // That's the show
                 sendSMS(number, msg);
-                Log.d("datez", "happyBirthday: name = " + name + " -- number = " + number);
+                Log.d("Utilities", "happyBirthday: name = " + name + " -- number = " + number);
 
                 listOfRecipients += name + ", ";
                 currLine = reader.readLine();
             }
 
-            // Great, we have all the data! Let's take a look!
+            // Remind myself of today's bdays
             // Substring to remove the last ", " lol
             listOfRecipients = listOfRecipients.substring(0, listOfRecipients.length() - 2);
             sendSMS(EnvironmentVars.myNumber, listOfRecipients);
-
         } catch (IOException ioe) {
             sendSMS(EnvironmentVars.myNumber, "Utilities/happyBirthday: ioe error\n" + ioe);
         }
 
     }
 
+    // Function generateHBMsg
+    // Generates a random Happy birthday message to deliver
+    // @param name The name of the recipient
     private static String generateHBMsg(String name) {
         String msg = "Automated: ";
         String [] msgs = {"Happy birthday ", "Have a nice birthday ", "Happy birthday dear "};
 
+        // Get a random message
         int randomIdx = (int) Math.floor(Math.random() * 3);
         String randomMsg = msgs[randomIdx];
 
@@ -202,6 +207,8 @@ public class Utilities {
 
     // Function sendSMS
     // Sends the msg to the phoneNo
+    // @param phoneNo The phone number to SMS
+    // @param msg The message to send in the text
     // Thank you, https://stackoverflow.com/questions/26311243/sending-sms-programmatically-without-opening-message-app
     private static void sendSMS(String phoneNo, String msg) {
         try {
