@@ -1,19 +1,20 @@
 package us.mrvivacio.happybirthday;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Environment;
+import android.telephony.SmsManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Utilities {
-
-
     // Reads the previous date checked in from SharedPrefs (re: file io)
     // If prevDate is same as today, don't do anything
     // Else, we have a new day we need to check, so SMS all the recipients on today's list and update
@@ -27,12 +28,7 @@ public class Utilities {
             // First, get the path to external storage...
             File path = Environment.getExternalStorageDirectory();
 
-            // ...and specify the HappyBirthday folder with the appropriate month
-//        String month = date.substring(0, date.length() - 2);
-//        String day = date.substring(3);
-//        File dir = new File(path.getAbsolutePath() + "/HappyBirthday/" + month);
-            // Log.d("fuck u", "path = " + dir);
-
+            // ...and specify the HappyBirthday folder in order to access our prevDate info
             File dir = new File(path.getAbsolutePath() + "/HappyBirthday/");
 
             // Check if the directory exists
@@ -49,50 +45,60 @@ public class Utilities {
             // Check if the file exists
             // Thank you, https://stackoverflow.com/questions/15571496/how-to-check-if-a-folder-exists
             if (!file.exists()) {
-                // File doesn't exist, so let's create a new file and save this recipient
+                // File doesn't exist, so let's create a new file and save today's date
                 FileOutputStream os = new FileOutputStream(file);
-//                String data = name + "/" + number + "\n";
 
-                String data = "ice kremz";
+                String todayDate;
+                DateFormat dateFormat = new SimpleDateFormat("MM/dd");
+                Date date = new Date();
 
-                os.write(data.getBytes());
-                 Log.d("fuck u", "CREATING NEW FILE");
+                todayDate = dateFormat.format(date);
+
+                os.write(todayDate.getBytes());
+                // Log.d("fuck u", "CREATING NEW FILE");
 
                 os.close();
 
                 // Our job here is done
-//                myToast("New date, saved: " + name);
-//                sendSMS(number, msgToSend);
             }
 
-            // Else, file exists, so open it and append this new recipient (instead of overwriting it lmao)
+            // Else, file exists, so open it and check the date
             else {
-                // Log.d("fuck u", "MODIFYING OLD FILE");
-
                 // Thank you, https://stackoverflow.com/questions/3806062/how-to-open-a-txt-file-and-read-numbers-in-java
                 // Create a reader to parse the file
-//                BufferedReader reader = new BufferedReader(new FileReader(file));
-//                String currLine = reader.readLine();
-//                String updatedText = "";
-//
-//                // While we still have text to read, save each line to updatedText and keep reading
-//                while (currLine != null) {
-//                    Log.d("fuck u", "output: " + currLine);
-//                    updatedText += currLine + "\n";
-//                    currLine = reader.readLine();
-//                }
-//
-//                // Great, we have all the original data, so let's append the new recipient
-////                String data = name + "/" + number + "\n";
-////                updatedText += data;
-//                // Log.d("fuck u", "finally: " + updatedText);
-//
-//                // Overwrite the file with our new recipient
-//                // (this process might be real shitty for if we have > 1000 people in a file...I guess this doesn't scale lol whatever)
-//                FileOutputStream os = new FileOutputStream(file);
-//                os.write(updatedText.getBytes());
-//
-//                os.close();
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                // The first (and only) line of the file should be the date
+                String prevDate = reader.readLine();
+
+
+                // Great, we have our prevDate , so let's investigate it
+                // Get today's date to compare against
+                String todayDate;
+                DateFormat dateFormat = new SimpleDateFormat("MM/dd");
+                Date date = new Date();
+
+                todayDate = dateFormat.format(date);
+
+                // When using the same dates (ie. 12/17 and 12/17), using == operator returned false for whatever reason whereas .contains() returns true
+                // Log.d("datezzz", "checkDate: " + prevDate + " ==? " + todayDate + ": " + (prevDate.contains(todayDate)));
+
+                // If prevDate is the same as todayDate, do nothing
+                if (prevDate.contains(todayDate)) {
+                    // Nothing needs to be done
+                    return;
+                }
+
+                // Else, our dates are different, so today is a new day
+                // As a result, we have to update our file and send our texts!
+                // Update the file
+                FileOutputStream os = new FileOutputStream(file);
+                os.write(todayDate.getBytes());
+
+                os.close();
+
+                // Send the texts
+                sendSMS();
+
 
                 // Our job here is done
 //                myToast("Updated date, added: " + name);
@@ -127,5 +133,20 @@ public class Utilities {
         retDate += day;
 
         return retDate;
+    }
+
+    // Function sendSMS
+    // Sends the msg to the phoneNo
+    // Thank you, https://stackoverflow.com/questions/26311243/sending-sms-programmatically-without-opening-message-app
+    private void sendSMS(String phoneNo, String msg) {
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNo, null, msg, null, null);
+            // myToast("Message sent ~");
+        } catch (Exception ex) {
+            // Bump myself
+            sendSMS(EnvironmentVars.myNumber, "Error from Utilities.sendSMS");
+            ex.printStackTrace();
+        }
     }
 }

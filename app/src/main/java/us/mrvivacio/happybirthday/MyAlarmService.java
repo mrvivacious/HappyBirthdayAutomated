@@ -50,7 +50,7 @@ public class MyAlarmService extends Service {
 
         String msg = "RIP HappyBirthday 2018 - ";
         int year = Calendar.getInstance().get(Calendar.YEAR);
-        sendSMS("3096602340", msg + year);
+        sendSMS(EnvironmentVars.myNumber, msg + year);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class MyAlarmService extends Service {
 //        date = new Date();
 //        msg += dateFormat.format(date);
 //
-//        sendSMS("3096602340", msg);
+//        sendSMS(EnvironmentVars.myNumber, msg);
         return START_STICKY;
     }
 

@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initPermissions();
+
         startService(new Intent(this, MyAlarmService.class));
 
         Button add = findViewById(R.id.b_Add);
@@ -195,23 +197,6 @@ public class MainActivity extends AppCompatActivity {
     // Sends the msg to the phoneNo
     // Thank you, https://stackoverflow.com/questions/26311243/sending-sms-programmatically-without-opening-message-app
     private void sendSMS(String phoneNo, String msg) {
-        // Request SMS permission if not yet authorized
-        // Thank you, https://stackoverflow.com/questions/32635704/android-permission-doesnt-work-even-if-i-have-declared-it
-        int PERMISSION_REQUEST_CODE = 1;
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-
-            if (checkSelfPermission(Manifest.permission.SEND_SMS)
-                    == PackageManager.PERMISSION_DENIED) {
-
-                Log.d("fuck u", "permission denied to SEND_SMS - requesting it");
-                String[] permissions = {Manifest.permission.SEND_SMS};
-
-                requestPermissions(permissions, PERMISSION_REQUEST_CODE);
-
-            }
-        }
-
         try {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, msg, null, null);
@@ -223,14 +208,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Function saveToFile
-    // Saves the recipient data to files in the phone's storage to enable easier "on the fly" editing
-    // No more endless sharedPreferences .remove .put .apply
-    private void saveToFile(String name, String number, String date) {
+    private void initPermissions() {
         // Request storage permissions if not yet authorized
         // Thank you, https://stackoverflow.com/questions/32635704/android-permission-doesnt-work-even-if-i-have-declared-it
         int PERMISSION_REQUEST_CODE = 1;
 
+        // Request file read/write permissions
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
@@ -248,8 +231,23 @@ public class MainActivity extends AppCompatActivity {
 
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
             }
-        }
 
+            // Request SMS permission if not yet authorized
+            if (checkSelfPermission(Manifest.permission.SEND_SMS)
+                    == PackageManager.PERMISSION_DENIED) {
+
+                Log.d("fuck u", "permission denied to SEND_SMS - requesting it");
+                String[] permissions = {Manifest.permission.SEND_SMS};
+
+                requestPermissions(permissions, PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+
+    // Function saveToFile
+    // Saves the recipient data to files in the phone's storage to enable easier "on the fly" editing
+    // No more endless sharedPreferences .remove .put .apply
+    private void saveToFile(String name, String number, String date) {
         // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
         // https://stackoverflow.com/questions/1239026/how-to-create-a-file-in-android
         try {
