@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Function show
-    // View the recipient's saved for this date
+    // View the recipients saved for this date
     // @param date The date to check
     private void show(String date) {
         // Thank you, https://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder,
